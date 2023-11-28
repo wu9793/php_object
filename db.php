@@ -25,10 +25,12 @@ class DB
 
             if (is_array($where)) {
                 if (!empty($where)) {
-                    foreach ($where as $col => $value) {
-                        $tmp[] = "`$col`='$value'";
-                    }
+                    $tmp = $this->a2s($where);
                     $sql .= " where " . join(" && ", $tmp);
+                    // foreach ($where as $col => $value) {
+                    //     $tmp[] = "`$col`='$value'";
+                    // }
+                    // $sql .= " where " . join(" && ", $tmp);
                 }
             } else {
                 $sql .= " $where";
@@ -49,10 +51,12 @@ class DB
 
             if (is_array($where)) {
                 if (!empty($where)) {
-                    foreach ($where as $col => $value) {
-                        $tmp[] = "`$col`='$value'";
-                    }
+                    $tmp = $this->a2s($where);
                     $sql .= " where " . join(" && ", $tmp);
+                    // foreach ($where as $col => $value) {
+                    //     $tmp[] = "`$col`='$value'";
+                    // }
+                    // $sql .= " where " . join(" && ", $tmp);
                 }
             } else {
                 $sql .= " $where";
@@ -72,11 +76,13 @@ class DB
 
         // 判斷是否為陣列
         if (is_array($id)) {
-            foreach ($id as $col => $value) {
-                $tmp[] = "`$col`='$value'";
-            }
+            $tmp = $this->a2s($id);
             $sql .= " where " . join(" && ", $tmp);
-            // 判斷是否為數字
+            // foreach ($id as $col => $value) {
+            //     $tmp[] = "`$col`='$value'";
+            // }
+            // $sql .= " where " . join(" && ", $tmp);
+            // // 判斷是否為數字
         } else if (is_numeric($id)) {
             $sql .= " where `id`='$id'";
         } else {
@@ -87,31 +93,27 @@ class DB
         return $row;
     }
 
-    
-    function save($array)
-    {
-        // 判斷 id 是否有數字
-        if (isset($array['id'])) {
-            $sql = "update `$this->table` set";
 
-            if (!empty($cols)) {
-                foreach ($cols as $col => $value) {
-                    $tmp[] = "`$col`='$value'";
-                }
+    function save($array){
+        if(isset($array['id'])){
+            $sql = "update `$this->table` set ";
+    
+            if (!empty($array)) {
+                $tmp = $this->a2s($array);
             } else {
                 echo "錯誤:缺少要編輯的欄位陣列";
             }
+        
             $sql .= join(",", $tmp);
-            $sql .= " where `id`='{$array['$id']}'";
-
-        } else {
-            $sql = "insert into `$this->table`";
+            $sql .= " where `id`='{$array['id']}'";
+        }else{
+            $sql = "insert into `$this->table` ";
             $cols = "(`" . join("`,`", array_keys($array)) . "`)";
             $vals = "('" . join("','", $array) . "')";
-
+        
             $sql = $sql . $cols . " values " . $vals;
-
         }
+
         return $this->pdo->exec($sql);
     }
 
@@ -132,25 +134,25 @@ class DB
 
     //     $sql .= join(",", $tmp);
     //     $sql .= " where `id`='{$cols['$id']}'";
-        // $tmp=[];
-        // if (is_array($id)) {
-        //     foreach ($id as $col => $value) {
-        //         $tmp[] = "`$col`='$value'";
-        //     }
-        //     $sql .= " where " . join(" && ", $tmp);
-        // } else if (is_numeric($id)) {
-        //     $sql .= " where `id`='$id'";
-        // } else {
-        //     echo "錯誤:參數的資料型態必須是數字或陣列";
-        // }
+    // $tmp=[];
+    // if (is_array($id)) {
+    //     foreach ($id as $col => $value) {
+    //         $tmp[] = "`$col`='$value'";
+    //     }
+    //     $sql .= " where " . join(" && ", $tmp);
+    // } else if (is_numeric($id)) {
+    //     $sql .= " where `id`='$id'";
+    // } else {
+    //     echo "錯誤:參數的資料型態必須是數字或陣列";
+    // }
 
-        // echo $sql;
+    // echo $sql;
     //     return $this->pdo->exec($sql);
     // }
 
 
 
-// 加入到 function save 裡
+    // 加入到 function save 裡
     // protected function insert($values)
     // {   
     //     $sql = "insert into `$this->table`";
@@ -169,10 +171,12 @@ class DB
 
         // 判斷是否為陣列
         if (is_array($id)) {
-            foreach ($id as $col => $value) {
-                $tmp[] = "`$col`='$value'";
-            }
+            $tmp = $this->a2s($id);
             $sql .= join(" && ", $tmp);
+            // foreach ($id as $col => $value) {
+            //     $tmp[] = "`$col`='$value'";
+            // }
+            // $sql .= join(" && ", $tmp);
             // 判斷是否為數字
         } else if (is_numeric($id)) {
             $sql .= "`id`='$id'";
@@ -183,11 +187,18 @@ class DB
 
         return $this->pdo->exec($sql);
     }
-    function q($sql){
+    function q($sql)
+    {
         return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-
     }
-    
+
+    private function a2s($array)
+    {
+        foreach ($array as $col => $value) {
+            $tmp[] = "`$col`='$value'";
+        }
+        return $tmp;
+    }
 }
 
 
